@@ -70,6 +70,11 @@ class PersonRepositoryTest {
         assertTrue(repository.findById(person.getId()).isPresent());
     }
 
+    @Test
+    @DisplayName("Testa exclusão logica da Peron excluded = true")
+    void exclude(){
+        person.setExcluded(true);
+    }
 
 
 }

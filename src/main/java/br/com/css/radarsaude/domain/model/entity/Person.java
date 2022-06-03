@@ -49,8 +49,13 @@ public class Person {
 
     @CreationTimestamp
     private LocalDateTime creationDate;
+
     @UpdateTimestamp
     private LocalDateTime lastUpdateDate;
+
+    @Column(nullable = false,columnDefinition = "default no")
+    @NotNull(message = "Excluded não pode ser null")
+    private boolean excluded;
 
 
 }
