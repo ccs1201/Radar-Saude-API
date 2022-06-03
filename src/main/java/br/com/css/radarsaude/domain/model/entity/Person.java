@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString(onlyExplicitlyIncluded = true)
 @Entity
 public class Person {
 
