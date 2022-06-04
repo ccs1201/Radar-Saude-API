@@ -1,9 +1,11 @@
 package br.com.css.radarsaude.domain.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -42,7 +44,8 @@ public class Person {
     @Column(nullable = false)
     private LocalDate birthDate;
 
-    @NotBlank(message = "Informe o numero do telefone.")
+    @NotBlank(message = "Número do telefone é obrigatório.")
+    @Length(min = 10, max = 11, message = "Número telefone inválido.\n Telefone deve conter entre 10 e 11 dígitos e conter somente números sem formatação.\n Ex 4831215000")
     @Column(length = 11, nullable = false)
     private String phoneNumber;
 
@@ -57,8 +60,8 @@ public class Person {
     @UpdateTimestamp
     private LocalDateTime lastUpdateDate;
 
+    @JsonIgnore
     @Column(nullable = false)
-    @NotNull(message = "Excluded não pode ser null")
     private boolean excluded;
 
 

@@ -6,19 +6,16 @@ import br.com.css.radarsaude.domain.exception.persistence.EntityPersistException
 import br.com.css.radarsaude.domain.exception.persistence.EntityUpdateException;
 import br.com.css.radarsaude.domain.exception.persistence.RepositoryEntityInUseException;
 import br.com.css.radarsaude.domain.model.representation.util.exception.GenericEntityUpdateMergerUtilException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @ControllerAdvice
 public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler implements ApiExceptionHandlerInterface {
@@ -57,11 +54,16 @@ public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler impl
 
 
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected @NotNull ResponseEntity<Object> handleExceptionInternal(
+            @NotNull Exception ex,
+            @Nullable Object body,
+            @NotNull HttpHeaders headers,
+            @NotNull HttpStatus status,
+            @NotNull WebRequest request) {
 
         if (ex instanceof MethodArgumentNotValidException) {
 
-            return new ResponseEntity<>(httpRequestMethodNotSupportedHandler((MethodArgumentNotValidException) ex), headers, status);
+            return new ResponseEntity<>(httpRequestMethodNotSupportedHandler((MethodArgumentNotValidException) ex, status), headers, status);
 
         } else if (body == null) {
             return buildResponseEntity(status, ex);
@@ -71,15 +73,18 @@ public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler impl
         }
     }
 
+    private ApiValidationErrorResponse httpRequestMethodNotSupportedHandler(MethodArgumentNotValidException ex, HttpStatus status) {
 
-    public Map<String, String> httpRequestMethodNotSupportedHandler(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+        ApiValidationErrorResponse apiValidationErrorResponse = new ApiValidationErrorResponse();
+        apiValidationErrorResponse.setStatus(status.value());
+        apiValidationErrorResponse.setError(status.name());
 
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
+        ex.getFieldErrors().forEach(fieldError -> apiValidationErrorResponse.getFieldValidationErrors()
+                .add(apiValidationErrorResponse.new FieldValidationError(
+                        fieldError.getField(), fieldError.getDefaultMessage(),
+                        String.format("%s", fieldError.getRejectedValue()))));
+
+        return apiValidationErrorResponse;
     }
+
 }

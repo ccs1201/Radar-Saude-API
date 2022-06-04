@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -70,7 +71,6 @@ public class PersonController {
             @RequestParam(defaultValue = "name") String orderBy,
             @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
 
-        //Page<Person> persons = personService.findAll(PageRequest.of(page,pageSize, Sort.by(direction, orderBy)));
         Page<Person> persons = personService.findAll(PageRequest.of(page, pageSize, direction, orderBy));
 
         return personMapper.toPage(persons);

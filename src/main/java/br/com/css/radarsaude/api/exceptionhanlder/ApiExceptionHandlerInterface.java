@@ -5,15 +5,11 @@ import org.springframework.http.ResponseEntity;
 
 public interface ApiExceptionHandlerInterface {
 
-    default ApiExceptionResponse buildResponse(Exception exception) {
-        return ApiExceptionResponse.builder().message(exception.getMessage()).build();
-
-    }
-
-    default ApiExceptionResponse buildResponse(Exception e, HttpStatus httpStatus) {
+    private ApiExceptionResponse buildResponse(Exception e, HttpStatus httpStatus) {
         return ApiExceptionResponse.builder().message(e.getLocalizedMessage())
-                .status(String.format("%d %s", httpStatus.value(), httpStatus.getReasonPhrase())).build();
-
+                .status(httpStatus.value())
+                .error(httpStatus.name())
+                .build();
     }
 
     default ResponseEntity<Object> buildResponseEntity(HttpStatus httpStatus, Exception exception) {
