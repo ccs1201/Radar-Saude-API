@@ -5,22 +5,18 @@ import br.com.css.radarsaude.domain.model.entity.Person;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
-import org.junit.runner.RunWith;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -73,12 +69,36 @@ class PersonControllerTest {
         mockMvc.perform(RestDocumentationRequestBuilders.post("/api/persons")
                 .content(personJson)
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty());
+
     }
 
     @Test
-    void update() {
+    @DisplayName("Testa Update deveria retornar 200 OK e LastUpdateDate maior que lastUpdateDate do responseBody")
+    void update() throws JsonProcessingException, Exception {
+
+        Person person = new Person();
+
+        String responseBody = mockMvc.perform(RestDocumentationRequestBuilders.get("/api/persons/4")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        BeanUtils.copyProperties(responseBody,person);
+
+        person.setBirthDate(LocalDate.of(2022,01,01));
+
+        String json = mapper.writeValueAsString(person);
+
+        String afterupdateResponseBody = mockMvc.perform(RestDocumentationRequestBuilders.put("/api/persons/4")
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+
     }
 
     @Test

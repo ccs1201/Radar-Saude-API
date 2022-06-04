@@ -77,7 +77,16 @@ public class PersonController {
 
     }
 
-    @RequestMapping("{/find}")
+    @GetMapping("{personId}")
+    @Operation(description = "Find an Person by their ID")
+    @ResponseStatus(HttpStatus.OK)
+    public PersonResponse findById(@PathVariable Long personId) {
+
+        return personMapper.toResponseModel(personService.findById(personId));
+    }
+
+
+    @RequestMapping("/find")
     @Operation(description = "Find persons by their name or e-email")
     @Parameter
     public Page<PersonResponse> find(@RequestParam(defaultValue = "0") int page,

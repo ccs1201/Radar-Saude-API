@@ -11,12 +11,12 @@ public interface ApiExceptionHandlerInterface {
     }
 
     default ApiExceptionResponse buildResponse(Exception e, HttpStatus httpStatus) {
-        return ApiExceptionResponse.builder().message(e.getMessage())
+        return ApiExceptionResponse.builder().message(e.getLocalizedMessage())
                 .status(String.format("%d %s", httpStatus.value(), httpStatus.getReasonPhrase())).build();
 
     }
 
-    default ResponseEntity<?> buildResponseEntity(HttpStatus httpStatus, Exception exception) {
+    default ResponseEntity<Object> buildResponseEntity(HttpStatus httpStatus, Exception exception) {
         return ResponseEntity.status(httpStatus).body(buildResponse(exception, httpStatus));
 
     }

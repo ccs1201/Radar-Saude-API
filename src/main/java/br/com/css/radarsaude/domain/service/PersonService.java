@@ -12,6 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolationException;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class PersonService implements ServiceInterface<Person> {
 
 
     @Override
+    @Transactional
     public Person save(Person entity) {
         try {
             return repository.save(entity);
@@ -38,6 +40,7 @@ public class PersonService implements ServiceInterface<Person> {
     }
 
     @Override
+    @Transactional
     public Person update(Long id, Person person) {
 
         Person personToUpdate = this.findById(id);
@@ -51,6 +54,7 @@ public class PersonService implements ServiceInterface<Person> {
     }
 
     @Override
+    @Transactional
     public Person patch(Long personId, Map<String, Object> updateValues) {
 
         Person personToUpdate = this.findById(personId);
@@ -66,6 +70,7 @@ public class PersonService implements ServiceInterface<Person> {
     }
 
     @Override
+    @Transactional
     public void exclude(Long personId) {
 
         Person person = this.findById(personId);
@@ -95,6 +100,6 @@ public class PersonService implements ServiceInterface<Person> {
 
     @Override
     public Page<Person> findExcluded(Boolean excluded, Pageable pageable) {
-        return repository.findExcluded(excluded, pageable);
+        return repository.excludedIs(excluded, pageable);
     }
 }

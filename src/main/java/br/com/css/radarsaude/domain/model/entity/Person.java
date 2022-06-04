@@ -57,7 +57,7 @@ public class Person {
     @UpdateTimestamp
     private LocalDateTime lastUpdateDate;
 
-    @Column(nullable = false,columnDefinition = "default no")
+    @Column(nullable = false)
     @NotNull(message = "Excluded não pode ser null")
     private boolean excluded;
 

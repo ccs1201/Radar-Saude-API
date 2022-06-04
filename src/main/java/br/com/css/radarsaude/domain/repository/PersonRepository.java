@@ -11,5 +11,6 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     Page<Person> findByNameOrEmailContaining(String nome, String email, Pageable pageable);
 
-    Page<Person> findExcluded(Boolean excluded, Pageable pageable);
+
+    Page<Person> excludedIs(Boolean excluded, Pageable pageable);
 }
