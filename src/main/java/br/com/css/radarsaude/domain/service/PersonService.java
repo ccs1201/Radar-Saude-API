@@ -1,24 +1,26 @@
 package br.com.css.radarsaude.domain.service;
 
-import br.com.css.radarsaude.domain.annotation.ServiceEntityType;
-import br.com.css.radarsaude.domain.annotation.EntityServiceType;
+import br.com.css.radarsaude.domain.annotation.ServiceTypeEntity;
+import br.com.css.radarsaude.domain.annotation.ServiceType;
 import br.com.css.radarsaude.domain.exception.persistence.EntityDataIntegrityViolationException;
+import br.com.css.radarsaude.domain.exception.persistence.EntityNotFoundException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityPersistException;
 import br.com.css.radarsaude.domain.model.entity.Person;
 import br.com.css.radarsaude.domain.model.representation.util.GenericEntityUpdateMergerUtil;
 import br.com.css.radarsaude.domain.repository.PersonRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolationException;
 import java.util.Map;
 
 @Service
 @AllArgsConstructor
-@EntityServiceType(ServiceEntityType.PERSON)
+@ServiceType(ServiceTypeEntity.PERSON)
 public class PersonService implements ServiceInterface<Person> {
 
     PersonRepository repository;
@@ -39,23 +41,37 @@ public class PersonService implements ServiceInterface<Person> {
     }
 
     @Override
-    public Person update(Long id, Map<String, Object> valuesToUpdate) {
-        Person personToUpdate = this.findById(id);
+    public Person update(Long id, Person person) {
 
-        mergerUtil.updateModel(valuesToUpdate, personToUpdate, Person.class);
+        Person personToUpdate = this.findById(id);
+        BeanUtils.copyProperties(person, personToUpdate, "id");
+        try {
+            return repository.save(personToUpdate);
+        } catch (ConstraintViolationException e) {
+            throw new EntityDataIntegrityViolationException("Erro ao Atualizar Person", e);
+        }
+
+    }
+
+    @Override
+    public Person patch(Long personId, Map<String, Object> updateValues) {
+
+        Person personToUpdate = this.findById(personId);
+
+        mergerUtil.updateModel(updateValues, personToUpdate, Person.class);
 
         return repository.save(personToUpdate);
     }
 
     @Override
-    public Person findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new EntityNotFoundException(String.format("Pessoa com ID: %d não existe.", id)));
+    public Person findById(Long personId) {
+        return repository.findById(personId).orElseThrow(() -> new EntityNotFoundException(String.format("Pessoa com ID: %d não existe.", personId)));
     }
 
     @Override
-    public void exclude(Long id) {
+    public void exclude(Long personId) {
 
-        Person person = this.findById(id);
+        Person person = this.findById(personId);
 
         person.setExcluded(true);
 
@@ -70,7 +86,14 @@ public class PersonService implements ServiceInterface<Person> {
 
     @Override
     public Page<Person> findByNameOrEmailContaining(String nome, String email, Pageable pageable) {
-        return repository.findByNameOrEmailContaining(nome, email, pageable);
+        Page<Person> page = repository.findByNameOrEmailContaining(nome, email, pageable);
+
+        if (page.isEmpty()) {
+            throw new EntityNotFoundException(
+                    String.format("Nenhum registro encontrado com os parâmetros: Nome: %s e Email: %s", nome, email));
+        }
+
+        return page;
     }
 
     @Override

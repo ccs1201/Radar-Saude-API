@@ -23,6 +23,7 @@ public class Person {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(updatable = false)
     @EqualsAndHashCode.Include
     private Long id;
 
@@ -48,6 +49,7 @@ public class Person {
     private String email;
 
     @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime creationDate;
 
     @UpdateTimestamp

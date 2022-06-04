@@ -27,6 +27,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
-public @interface EntityServiceType {
-    ServiceEntityType value();
+public @interface ServiceType {
+    ServiceTypeEntity value();
 }

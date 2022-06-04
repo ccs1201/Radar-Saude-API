@@ -1,7 +1,7 @@
 package br.com.css.radarsaude.api.exceptionhanlder;
 
 import br.com.css.radarsaude.domain.exception.BusinessLogicException;
-import br.com.css.radarsaude.domain.exception.persistence.EntityNotFound;
+import br.com.css.radarsaude.domain.exception.persistence.EntityNotFoundException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityPersistException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityUpdateException;
 import br.com.css.radarsaude.domain.exception.persistence.RepositoryEntityInUseException;
@@ -19,8 +19,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler implements ApiExceptionHandlerInterface {
 
 
-    @ExceptionHandler(EntityNotFound.class)
-    public ResponseEntity<?> entityNotFoundExceptionHandler(EntityNotFound e) {
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<?> entityNotFoundExceptionHandler(EntityNotFoundException e) {
         return buildResponseEntity(HttpStatus.NOT_FOUND, e);
     }
 

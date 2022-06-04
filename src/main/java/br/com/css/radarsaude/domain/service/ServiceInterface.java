@@ -31,7 +31,9 @@ interface ServiceInterface<ENTITY> {
 
     ENTITY save(ENTITY entity);
 
-    ENTITY update(Long id, Map<String, Object> valuesToUpdate);
+    ENTITY update(Long id, ENTITY entity);
+
+    Person patch(Long id, Map<String, Object> updateValues);
 
     ENTITY findById(Long id);
 
