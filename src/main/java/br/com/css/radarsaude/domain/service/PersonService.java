@@ -1,7 +1,5 @@
 package br.com.css.radarsaude.domain.service;
 
-import br.com.css.radarsaude.domain.annotation.ServiceTypeEntity;
-import br.com.css.radarsaude.domain.annotation.ServiceType;
 import br.com.css.radarsaude.domain.exception.persistence.EntityDataIntegrityViolationException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityNotFoundException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityPersistException;
@@ -20,7 +18,6 @@ import java.util.Map;
 
 @Service
 @AllArgsConstructor
-@ServiceType(ServiceTypeEntity.PERSON)
 public class PersonService implements ServiceInterface<Person> {
 
     PersonRepository repository;
@@ -98,6 +95,6 @@ public class PersonService implements ServiceInterface<Person> {
 
     @Override
     public Page<Person> findExcluded(Boolean excluded, Pageable pageable) {
-        return repository.findbyExcluded(excluded, pageable);
+        return repository.findExcluded(excluded, pageable);
     }
 }

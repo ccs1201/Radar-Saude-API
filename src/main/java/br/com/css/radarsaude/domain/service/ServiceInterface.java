@@ -26,7 +26,7 @@ import java.util.Map;
  * as Entidades que devem ser anotadas.
  */
 
-interface ServiceInterface<ENTITY> {
+public interface ServiceInterface<ENTITY> {
 
 
     ENTITY save(ENTITY entity);
