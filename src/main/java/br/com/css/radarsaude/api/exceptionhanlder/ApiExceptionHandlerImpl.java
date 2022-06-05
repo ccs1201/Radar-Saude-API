@@ -56,7 +56,7 @@ public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler impl
     @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
     @ApiResponse(responseCode = "412", description = "Cannot merge data to persist")
     public ResponseEntity<?> genericEntityUpdateMergerUtilExceptionHandler(GenericEntityUpdateMergerUtilException e) {
-        return buildResponseEntity(HttpStatus.CONFLICT, e);
+        return buildResponseEntity(HttpStatus.PRECONDITION_FAILED, e);
     }
 
     @ExceptionHandler(EntityUpdateException.class)
