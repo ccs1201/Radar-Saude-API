@@ -98,8 +98,8 @@ public class PersonController {
             @Parameter(name = "pageSize", description = "Number of elements to be returned per page"),
             @Parameter(name = "orderBy", description = "The field by which the result should be sorted "),
             @Parameter(name = "direction", description = "The Direction of sorting ASC (ASCENDING) or DESC (DESCENDING)"),
-    @Parameter(name = "name", description = "Name of the person to search."),
-    @Parameter(name = "email", description = "Email of the Person to search")})
+            @Parameter(name = "name", description = "Name of the person to search."),
+            @Parameter(name = "email", description = "Email of the Person to search")})
     public Page<PersonResponse> find(@RequestParam(defaultValue = "0") int pageNumber,
                                      @RequestParam(defaultValue = "10") int pageSize,
                                      @RequestParam(defaultValue = "name") String orderBy,
