@@ -2,25 +2,24 @@ package br.com.css.radarsaude.api.controller;
 
 import br.com.css.radarsaude.domain.model.entity.Gender;
 import br.com.css.radarsaude.domain.model.entity.Person;
-import br.com.css.radarsaude.domain.repository.PersonRepository;
 import br.com.css.radarsaude.domain.service.PersonService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
 import org.junit.jupiter.api.*;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
-import java.util.Optional;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @SpringBootTest
@@ -29,11 +28,9 @@ import java.util.Optional;
 class PersonControllerTest {
 
     private Person validPerson;
-    private Person invalidPerson;
     private final String BASE_URI = "/api/persons/";
-
-
-    long id = 4; //Id da pessoal que será utilizado nos testes
+    private final PageRequest PAGE_REQUEST = PageRequest.of(0, 10, Sort.Direction.ASC, "name");
+    private final String URI_PAGE_REQUEST = String.format("?page=%d&size=1%d&order=%s&direction=%s", 0, 10, "name", Sort.Direction.ASC);
 
     @Autowired
     private MockMvc mockMvc;
@@ -46,18 +43,32 @@ class PersonControllerTest {
 
     String personJson;
 
+    //MÉTODO USADO PRA POPULAR O BANCO COM DADOS PARA TESTE
+       private void dataPopulateForTests(){
+           for (int i = 0; i < 100; i++) {
+               Person person = Person.builder()
+                       .birthDate(LocalDate.of(1990, 6, 10).plusDays(i))
+                       .email(String.format("person%d@person%d.com", i, i))
+                       .gender(Gender.MALE)
+                       .name(String.format("Person %d", i))
+                       .phoneNumber("0000000000")
+                       .build();
 
-    @BeforeEach
+               service.save(person);
+           }
+       }
+
+    @BeforeAll
     void setUp() {
-        validPerson = Person.builder()
-                .birthDate(LocalDate.of(1990, 6, 10))
-                .email("person@person.com")
-                .gender(Gender.MALE)
-                .name("Test Person")
-                .phoneNumber("48123456789")
-                .build();
+        //dataPopulateForTests();
 
-        invalidPerson = Person.builder().build();
+        validPerson = Person.builder()
+                .birthDate(LocalDate.now())
+                .email("personcontrollertest@personcontrolertest.com")
+                .gender(Gender.FEMALE)
+                .phoneNumber("0000000000")
+                .name("personcontrollertest")
+                .build();
 
         try {
             personJson = mapper.writeValueAsString(validPerson);
@@ -78,16 +89,16 @@ class PersonControllerTest {
 
         mockMvc.perform(RestDocumentationRequestBuilders.post(BASE_URI)
                         .content(personJson)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").isNotEmpty());
-
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNotEmpty());
     }
 
     @Test
     @DisplayName("Testa Update deveria retornar 200 OK e LastUpdateDate maior que lastUpdateDate do responseBody")
     void update() throws Exception {
 
+        long id = generateRandomId();
 
         Person person = service.findById(id);
 
@@ -96,50 +107,127 @@ class PersonControllerTest {
         String json = mapper.writeValueAsString(person);
 
         mockMvc.perform(RestDocumentationRequestBuilders.put(BASE_URI + id)
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content(mapper.writeValueAsString(person)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.birthDate").value("2022-01-01"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.birthDate").value("2022-01-01"));
     }
 
     @Test
     @DisplayName("Testa atualização parcial de uma pessoa deveria retorna 200 OK se o nome foi alterado corretamente.")
     void patch() throws Exception {
 
+        long id = generateRandomId();
+
         mockMvc.perform(RestDocumentationRequestBuilders.patch(BASE_URI + id)
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
                         .content("{\"name\":\"Zacarias\"}"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Zacarias"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Zacarias"));
     }
 
     @Test
     @DisplayName("Testa exclusão lógica de uma pessoa, deveria retornar 200 OK")
     void exclude() throws Exception {
 
+        long id = generateRandomId();
+
         Person person = service.findById(id);
         person.setExcluded(false);
         service.save(person);
 
-        mockMvc.perform(RestDocumentationRequestBuilders.delete(BASE_URI+ id)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+        mockMvc.perform(RestDocumentationRequestBuilders.delete(BASE_URI + id)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk());
 
         Assertions.assertTrue(service.findById(id).isExcluded());
     }
 
     @Test
-    @DisplayName("testa findAll com page=0, size=10, direction=ASC, sort=name deveria retorna a mesma Quantidade de registos do qtdRegistrosBD")
+    @DisplayName("Testa findAll com a constante URI_PAGE_REQUEST e PAGE_REQUEST" +
+            " deveria retorna a mesma Quantidade de registos do qtdRegistrosBD")
     void findAll() throws Exception {
-        long qtdRegistrosBD = service.findAll( PageRequest.of(0,10, Sort.Direction.valueOf("ASC"), "name")).getTotalElements();
+        long qtdRegistrosBD = service.findAll(PAGE_REQUEST).getTotalElements();
 
-        mockMvc.perform(RestDocumentationRequestBuilders.get(BASE_URI)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("totalElements").value(qtdRegistrosBD));
+
+        mockMvc.perform(RestDocumentationRequestBuilders.get(BASE_URI + URI_PAGE_REQUEST)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("totalElements").value(qtdRegistrosBD));
     }
 
     @Test
-    void find() {
+    @DisplayName("Testa /find sem passar parâmetros deveria retornar 404 BAD_REQUEST")
+    void findWithoutParameters() throws Exception {
+        MvcResult response = mockMvc.perform(RestDocumentationRequestBuilders.get(BASE_URI + "/find" + URI_PAGE_REQUEST)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    @DisplayName("Testa /find somente com o nome da pessoal, " +
+            "deveria retornar somente pessoas com nome informado e retornar 200 OK se ao menos um registro for localizado")
+    void findByOnlyName() throws Exception {
+
+        long id = generateRandomId();
+
+        Person person = service.findById(id);
+
+        String find = String.format("&name=%s", person.getName());
+
+        MvcResult response = mockMvc.perform(RestDocumentationRequestBuilders.get(BASE_URI + "/find" + URI_PAGE_REQUEST + find)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].name").isNotEmpty())
+                .andReturn();
+
+        Assertions.assertTrue(response.getResponse().getContentAsString().contains(person.getName()));
+    }
+
+    @Test
+    @DisplayName("Testa /find somente com o email da pessoal, " +
+            "deveria retornar somente pessoas com email informado e retornar 200 OK se ao menos um registro for localizado")
+    void findByOnlyEmail() throws Exception {
+
+        long id = generateRandomId();
+
+        Person person = service.findById(id);
+
+        String find = String.format("&email=%s", person.getEmail());
+
+        MvcResult response = mockMvc.perform(RestDocumentationRequestBuilders.get(BASE_URI + "/find" + URI_PAGE_REQUEST + find)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].email").isNotEmpty())
+                .andReturn();
+
+        Assertions.assertTrue(response.getResponse().getContentAsString().contains(person.getEmail()));
+    }
+
+    @Test
+    @DisplayName("Testa /find com nome e email da pessoal, " +
+            "deveria retornar somente pessoas com nome ou email informado e retornar 200 OK se ao menos um registro for localizado")
+    void findByNameAndEmail() throws Exception {
+
+        long id = generateRandomId();
+
+        Person person = service.findById(id);
+
+        String find = String.format("&email=%s&name=%s", person.getEmail(), person.getName());
+
+        MvcResult response = mockMvc.perform(RestDocumentationRequestBuilders.get(BASE_URI + "/find" + URI_PAGE_REQUEST + find)
+                        .contentType(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[*].email").isNotEmpty())
+                .andReturn();
+
+        Assertions.assertTrue(response.getResponse().getContentAsString().contains(person.getEmail()));
+        Assertions.assertTrue(response.getResponse().getContentAsString().contains(person.getName()));
+
+    }
+
+    private Long generateRandomId() {
+        return Double.valueOf(Math.random() * 100).longValue();
     }
 }

@@ -6,6 +6,7 @@ import br.com.css.radarsaude.domain.exception.persistence.EntityPersistException
 import br.com.css.radarsaude.domain.exception.persistence.EntityUpdateException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityInUseException;
 import br.com.css.radarsaude.domain.model.representation.util.exception.GenericEntityUpdateMergerUtilException;
+import com.fasterxml.jackson.core.JsonParseException;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
@@ -52,8 +53,8 @@ public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler impl
     }
 
     @ExceptionHandler(GenericEntityUpdateMergerUtilException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ApiResponse(responseCode = "409", description = "Cannot merge data to persist")
+    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+    @ApiResponse(responseCode = "412", description = "Cannot merge data to persist")
     public ResponseEntity<?> genericEntityUpdateMergerUtilExceptionHandler(GenericEntityUpdateMergerUtilException e) {
         return buildResponseEntity(HttpStatus.CONFLICT, e);
     }
@@ -64,6 +65,20 @@ public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler impl
     public ResponseEntity<?> entityUpdateExceptionHandler(EntityUpdateException e) {
         return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
     }
+
+    @ExceptionHandler(JsonParseException.class)
+    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+    @ApiResponse(responseCode = "412", description = "malformed data")
+    public ResponseEntity<?> jsonParseExceptionHandler(JsonParseException e){
+        return buildResponseEntity(HttpStatus.PRECONDITION_FAILED, e);
+    }
+
+  /*  @ExceptionHandler(NullPointerException.class)
+    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
+    @ApiResponse(responseCode = "412", description = "malformed data")
+    public ResponseEntity<?> jsonParseExceptionHandler(NullPointerException e){
+        return buildResponseEntity(HttpStatus.PRECONDITION_FAILED, e);
+    }*/
 
 
     @Override

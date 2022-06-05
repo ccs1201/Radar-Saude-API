@@ -1,6 +1,7 @@
 package br.com.css.radarsaude.domain.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicUpdate;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @DynamicUpdate
 @Entity
+@Schema(description = "Full implementation of an person")
 public class Person {
 
     @Id
@@ -38,7 +40,7 @@ public class Person {
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(length = 5, nullable = false)
+    @Column(length = 6, nullable = false)
     private Gender gender;
 
     @NotNull

@@ -66,17 +66,17 @@ public class PersonController {
     @Operation(description = "list all Persons plus pageable")
     @ResponseStatus(HttpStatus.OK)
     @Parameters({
-            @Parameter(name = "pageNumber", description = "Number of page result"),
-            @Parameter(name = "pageSize", description = "Number of elements to be returned per page"),
-            @Parameter(name = "orderBy", description = "The field by which the result should be sorted "),
+            @Parameter(name = "page", description = "Number of page result"),
+            @Parameter(name = "size", description = "Number of elements to be returned per page"),
+            @Parameter(name = "order", description = "The field by which the result should be sorted "),
             @Parameter(name = "direction", description = "The Direction of sorting ASC (ASCENDING) or DESC (DESCENDING)")})
     public Page<PersonResponse> findAll(
-            @RequestParam(defaultValue = "0") int pageNumber,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "name") String orderBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String order,
             @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
 
-        Page<Person> persons = personService.findAll(PageRequest.of(pageNumber, pageSize, direction, orderBy));
+        Page<Person> persons = personService.findAll(PageRequest.of(page, size, direction, order));
 
         return personMapper.toPage(persons);
 
@@ -94,21 +94,21 @@ public class PersonController {
     @GetMapping("/find")
     @Operation(description = "Find persons by their name and or e-email")
     @Parameters({
-            @Parameter(name = "pageNumber", description = "Number of page result"),
-            @Parameter(name = "pageSize", description = "Number of elements to be returned per page"),
-            @Parameter(name = "orderBy", description = "The field by which the result should be sorted "),
+            @Parameter(name = "page", description = "Number of page result"),
+            @Parameter(name = "size", description = "Number of elements to be returned per page"),
+            @Parameter(name = "order", description = "The field by which the result should be sorted "),
             @Parameter(name = "direction", description = "The Direction of sorting ASC (ASCENDING) or DESC (DESCENDING)"),
             @Parameter(name = "name", description = "Name of the person to search."),
             @Parameter(name = "email", description = "Email of the Person to search")})
-    public Page<PersonResponse> find(@RequestParam(defaultValue = "0") int pageNumber,
-                                     @RequestParam(defaultValue = "10") int pageSize,
-                                     @RequestParam(defaultValue = "name") String orderBy,
+    public Page<PersonResponse> find(@RequestParam(defaultValue = "0") int page,
+                                     @RequestParam(defaultValue = "10") int size,
+                                     @RequestParam(defaultValue = "name") String order,
                                      @RequestParam(defaultValue = "ASC") Sort.Direction direction,
                                      @RequestParam @Nullable String name,
                                      @RequestParam @Nullable String email) {
 
         Page<Person> persons = personService.findByNameOrEmailContaining(
-                name, email, PageRequest.of(pageNumber, pageSize, direction, orderBy));
+                name, email, PageRequest.of(page, size, direction, order));
 
         return personMapper.toPage(persons);
     }
