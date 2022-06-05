@@ -37,7 +37,7 @@ public class PersonService implements ServiceInterface<Person> {
             return repository.save(entity);
 
         } catch (IllegalArgumentException e) {
-            throw new EntityPersistException(String.format("Erro ao salva Pessoa. \nDetalhes:\n %s", e.getMessage()));
+            throw new EntityPersistException(String.format("Erro ao salvar Pessoa. \nDetalhes:\n %s", e.getMessage()));
         } catch (DataIntegrityViolationException e) {
             throw new EntityDataIntegrityViolationException("Dados inválidos. Cheque os campos obrigatórios. Verifique os Detalhes:\n ", e);
         }
