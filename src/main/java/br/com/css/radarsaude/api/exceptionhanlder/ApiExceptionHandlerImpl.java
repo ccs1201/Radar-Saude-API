@@ -4,7 +4,7 @@ import br.com.css.radarsaude.domain.exception.BusinessLogicException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityNotFoundException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityPersistException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityUpdateException;
-import br.com.css.radarsaude.domain.exception.persistence.RepositoryEntityInUseException;
+import br.com.css.radarsaude.domain.exception.persistence.EntityInUseException;
 import br.com.css.radarsaude.domain.model.representation.util.exception.GenericEntityUpdateMergerUtilException;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.jetbrains.annotations.NotNull;
@@ -36,10 +36,10 @@ public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler impl
         return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
     }
 
-    @ExceptionHandler(RepositoryEntityInUseException.class)
+    @ExceptionHandler(EntityInUseException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     @ApiResponse(responseCode = "409", description = "Record in use and cannot be removed")
-    public ResponseEntity<?> entityInUseExceptionHandler(RepositoryEntityInUseException e) {
+    public ResponseEntity<?> entityInUseExceptionHandler(EntityInUseException e) {
 
         return buildResponseEntity(HttpStatus.CONFLICT, e);
     }

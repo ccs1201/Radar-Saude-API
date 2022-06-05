@@ -76,7 +76,7 @@ class PersonControllerTest {
 
     @Test
     @DisplayName("Testa Update deveria retornar 200 OK e LastUpdateDate maior que lastUpdateDate do responseBody")
-    void update() throws JsonProcessingException, Exception {
+    void update() throws Exception {
 
         Person person = new Person();
 
