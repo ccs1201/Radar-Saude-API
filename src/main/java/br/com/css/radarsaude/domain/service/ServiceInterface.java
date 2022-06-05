@@ -45,4 +45,6 @@ public interface ServiceInterface<ENTITY> {
 
     Page<ENTITY> findExcluded(Boolean excluded, Pageable pageable);
 
+    Page<ENTITY> findByNameOrEmailCriteria(String name, String email, Pageable pageable);
+
 }

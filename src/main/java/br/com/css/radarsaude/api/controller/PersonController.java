@@ -6,6 +6,7 @@ import br.com.css.radarsaude.domain.model.representation.util.mapper.PersonMappe
 import br.com.css.radarsaude.domain.service.PersonService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -47,7 +48,7 @@ public class PersonController {
     @PatchMapping("/{personId}")
     @Operation(description = "Partial update for an Person")
     @ResponseStatus(HttpStatus.OK)
-    public PersonResponse patch(@PathVariable Long personId, Map<String, Object> valuesToUpdate) {
+    public PersonResponse patch(@PathVariable Long personId, @RequestBody Map<String, Object> valuesToUpdate) {
 
         return personMapper.toResponseModel(personService.patch(personId, valuesToUpdate));
     }
@@ -63,15 +64,19 @@ public class PersonController {
 
     @GetMapping
     @Operation(description = "list all Persons plus pageable")
-    @Parameter
     @ResponseStatus(HttpStatus.OK)
+    @Parameters({
+            @Parameter(name = "pageNumber", description = "Number of page result"),
+            @Parameter(name = "pageSize", description = "Number of elements to be returned per page"),
+            @Parameter(name = "orderBy", description = "The field by which the result should be sorted "),
+            @Parameter(name = "direction", description = "The Direction of sorting ASC (ASCENDING) or DESC (DESCENDING)")})
     public Page<PersonResponse> findAll(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "0") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(defaultValue = "name") String orderBy,
             @RequestParam(defaultValue = "ASC") Sort.Direction direction) {
 
-        Page<Person> persons = personService.findAll(PageRequest.of(page, pageSize, direction, orderBy));
+        Page<Person> persons = personService.findAll(PageRequest.of(pageNumber, pageSize, direction, orderBy));
 
         return personMapper.toPage(persons);
 
@@ -86,18 +91,24 @@ public class PersonController {
     }
 
 
-    @RequestMapping("/find")
-    @Operation(description = "Find persons by their name or e-email")
-    @Parameter
-    public Page<PersonResponse> find(@RequestParam(defaultValue = "0") int page,
+    @GetMapping("/find")
+    @Operation(description = "Find persons by their name and or e-email")
+    @Parameters({
+            @Parameter(name = "pageNumber", description = "Number of page result"),
+            @Parameter(name = "pageSize", description = "Number of elements to be returned per page"),
+            @Parameter(name = "orderBy", description = "The field by which the result should be sorted "),
+            @Parameter(name = "direction", description = "The Direction of sorting ASC (ASCENDING) or DESC (DESCENDING)"),
+    @Parameter(name = "name", description = "Name of the person to search."),
+    @Parameter(name = "email", description = "Email of the Person to search")})
+    public Page<PersonResponse> find(@RequestParam(defaultValue = "0") int pageNumber,
                                      @RequestParam(defaultValue = "10") int pageSize,
                                      @RequestParam(defaultValue = "name") String orderBy,
                                      @RequestParam(defaultValue = "ASC") Sort.Direction direction,
-                                     @RequestParam String name,
-                                     @RequestParam String email) {
+                                     @RequestParam @Nullable String name,
+                                     @RequestParam @Nullable String email) {
 
         Page<Person> persons = personService.findByNameOrEmailContaining(
-                name, email, PageRequest.of(page, pageSize, direction, orderBy));
+                name, email, PageRequest.of(pageNumber, pageSize, direction, orderBy));
 
         return personMapper.toPage(persons);
     }

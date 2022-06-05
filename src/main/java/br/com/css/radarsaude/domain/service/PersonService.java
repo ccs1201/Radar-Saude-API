@@ -6,23 +6,28 @@ import br.com.css.radarsaude.domain.exception.persistence.EntityPersistException
 import br.com.css.radarsaude.domain.model.entity.Person;
 import br.com.css.radarsaude.domain.model.representation.util.GenericEntityUpdateMergerUtil;
 import br.com.css.radarsaude.domain.repository.PersonRepository;
-import lombok.AllArgsConstructor;
+import br.com.css.radarsaude.domain.repository.especification.PersonQueriesSpecification;
+import br.com.css.radarsaude.domain.service.exception.NoRequestParameterFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.validation.ConstraintViolationException;
 import java.util.Map;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class PersonService implements ServiceInterface<Person> {
 
-    PersonRepository repository;
-    GenericEntityUpdateMergerUtil mergerUtil;
+    private final PersonRepository repository;
+    @Lazy
+    private final GenericEntityUpdateMergerUtil mergerUtil;
 
 
     @Override
@@ -66,7 +71,9 @@ public class PersonService implements ServiceInterface<Person> {
 
     @Override
     public Person findById(Long personId) {
-        return repository.findById(personId).orElseThrow(() -> new EntityNotFoundException(String.format("Pessoa com ID: %d não existe.", personId)));
+        return repository.findById(personId)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(String.format("Pessoa com ID: %d não existe.", personId)));
     }
 
     @Override
@@ -87,12 +94,26 @@ public class PersonService implements ServiceInterface<Person> {
     }
 
     @Override
-    public Page<Person> findByNameOrEmailContaining(String nome, String email, Pageable pageable) {
-        Page<Person> page = repository.findByNameOrEmailContaining(nome, email, pageable);
+    public Page<Person> findByNameOrEmailContaining(String name, String email, Pageable pageable) {
+
+        if (!StringUtils.hasText(name) && !StringUtils.hasText(email)) {
+            throw new NoRequestParameterFoundException("Nenhum valor informado para consulta.\n Informe ao menos um dos seguintes parâmetros: name ou email");
+        }
+
+        Page<Person> page;
+
+        if (StringUtils.hasText(name) && StringUtils.hasText(email)) {
+            page = repository.findByNameIgnoreCaseOrEmailContainingIgnoreCase(name, email, pageable);
+
+        } else if (StringUtils.hasText(name)) {
+            page = repository.findByNameContainingIgnoreCase(name, pageable);
+
+        } else {
+            page = repository.findByEmailContainingIgnoreCase(email, pageable);
+        }
 
         if (page.isEmpty()) {
-            throw new EntityNotFoundException(
-                    String.format("Nenhum registro encontrado com os parâmetros: Nome: %s e Email: %s", nome, email));
+            throw new EntityNotFoundException(String.format("Nenhum registro encontrado com os parâmetros: Nome: %s e Email: %s", name, email));
         }
 
         return page;
@@ -101,5 +122,23 @@ public class PersonService implements ServiceInterface<Person> {
     @Override
     public Page<Person> findExcluded(Boolean excluded, Pageable pageable) {
         return repository.excludedIs(excluded, pageable);
+    }
+
+    @Override
+    public Page<Person> findByNameOrEmailCriteria(String name, String email, Pageable pageable) {
+
+        if (!StringUtils.hasText(name) && !StringUtils.hasText(email)) {
+            throw new NoRequestParameterFoundException("Nenhum valor informado para consulta.\n Informe ao menos um dos seguintes parâmetros: name ou email");
+        }
+
+        if (StringUtils.hasText(name) && StringUtils.hasText(email)) {
+            return repository.findAll(PersonQueriesSpecification.namelike(name).or(PersonQueriesSpecification.emailLike(email)), pageable);
+
+        } else if (StringUtils.hasText(name)) {
+            return repository.findAll(PersonQueriesSpecification.namelike(name), pageable);
+
+        } else {
+            return repository.findAll(PersonQueriesSpecification.emailLike(email), pageable);
+        }
     }
 }
