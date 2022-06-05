@@ -73,8 +73,6 @@
             <artifactId>springdoc-openapi-data-rest</artifactId>
             <version>1.6.9</version>
         </dependency>
-        <!-- Documentation Dependencies -->
-
         <!--Mockito
         <dependency>
             <groupId>org.mockito</groupId>
@@ -101,6 +99,10 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
 
     </dependencies>
 

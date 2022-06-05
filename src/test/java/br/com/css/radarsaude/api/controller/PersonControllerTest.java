@@ -44,7 +44,7 @@ class PersonControllerTest {
     String personJson;
 
     //MÉTODO USADO PRA POPULAR O BANCO COM DADOS PARA TESTE
-       private void dataPopulateForTests(){
+       private void populateDataForTest(){
            for (int i = 0; i < 100; i++) {
                Person person = Person.builder()
                        .birthDate(LocalDate.of(1990, 6, 10).plusDays(i))
@@ -60,7 +60,7 @@ class PersonControllerTest {
 
     @BeforeAll
     void setUp() {
-        //dataPopulateForTests();
+        populateDataForTest();
 
         validPerson = Person.builder()
                 .birthDate(LocalDate.now())
