@@ -3,6 +3,7 @@ package br.com.css.radarsaude.domain.model.representation.util;
 import br.com.css.radarsaude.domain.model.representation.util.exception.GenericEntityUpdateMergerUtilException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
@@ -21,7 +22,7 @@ import java.util.Map;
  */
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class GenericEntityUpdateMergerUtil {
 
     ObjectMapper mapper;

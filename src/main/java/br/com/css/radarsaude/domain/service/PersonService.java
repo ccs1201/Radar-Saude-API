@@ -27,7 +27,7 @@ public class PersonService implements ServiceInterface<Person> {
 
     private final PersonRepository repository;
     @Lazy
-    private final GenericEntityUpdateMergerUtil mergerUtil;
+    private GenericEntityUpdateMergerUtil mergerUtil;
 
 
     @Override
@@ -41,7 +41,6 @@ public class PersonService implements ServiceInterface<Person> {
         } catch (DataIntegrityViolationException e) {
             throw new EntityDataIntegrityViolationException("Dados inválidos. Cheque os campos obrigatórios. Verifique os Detalhes:\n ", e);
         }
-
     }
 
     @Override
@@ -55,7 +54,6 @@ public class PersonService implements ServiceInterface<Person> {
         } catch (ConstraintViolationException e) {
             throw new EntityDataIntegrityViolationException("Erro ao Atualizar Person", e);
         }
-
     }
 
     @Override
@@ -85,7 +83,6 @@ public class PersonService implements ServiceInterface<Person> {
         person.setExcluded(true);
 
         repository.save(person);
-
     }
 
     @Override

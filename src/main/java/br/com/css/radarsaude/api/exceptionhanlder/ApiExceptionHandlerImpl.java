@@ -67,10 +67,10 @@ public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler impl
     }
 
     @ExceptionHandler(JsonParseException.class)
-    @ResponseStatus(HttpStatus.PRECONDITION_FAILED)
-    @ApiResponse(responseCode = "412", description = "malformed data")
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ApiResponse(responseCode = "400", description = "malformed data")
     public ResponseEntity<?> jsonParseExceptionHandler(JsonParseException e){
-        return buildResponseEntity(HttpStatus.PRECONDITION_FAILED, e);
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
     }
 
   /*  @ExceptionHandler(NullPointerException.class)
