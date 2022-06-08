@@ -68,6 +68,4 @@ public class Person {
     @JsonIgnore
     @Column(nullable = false)
     private boolean excluded;
-
-
 }
