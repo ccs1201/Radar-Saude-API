@@ -1,6 +1,6 @@
 # Radar-Saude-API
 
-É um projeto spingboot/Maven, utilizando as seguintes dependências:
+Este é um projeto spingboot/Maven, utilizando as seguintes dependências:
 
 * spring data jpa
 

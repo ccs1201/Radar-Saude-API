@@ -1,10 +1,10 @@
 package br.com.css.radarsaude.api.exceptionhanlder;
 
 import br.com.css.radarsaude.domain.exception.BusinessLogicException;
+import br.com.css.radarsaude.domain.exception.persistence.EntityInUseException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityNotFoundException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityPersistException;
 import br.com.css.radarsaude.domain.exception.persistence.EntityUpdateException;
-import br.com.css.radarsaude.domain.exception.persistence.EntityInUseException;
 import br.com.css.radarsaude.domain.model.representation.util.exception.GenericEntityUpdateMergerUtilException;
 import com.fasterxml.jackson.core.JsonParseException;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -14,19 +14,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler implements ApiExceptionHandlerInterface {
 
 
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ApiResponse(responseCode = "404",description = "No record found for the given parameter")
+    @ApiResponse(responseCode = "404", description = "No record found for the given parameter")
     public ResponseEntity<?> entityNotFoundExceptionHandler(EntityNotFoundException e) {
         return buildResponseEntity(HttpStatus.NOT_FOUND, e);
     }
@@ -69,7 +69,7 @@ public class ApiExceptionHandlerImpl extends ResponseEntityExceptionHandler impl
     @ExceptionHandler(JsonParseException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ApiResponse(responseCode = "400", description = "malformed data")
-    public ResponseEntity<?> jsonParseExceptionHandler(JsonParseException e){
+    public ResponseEntity<?> jsonParseExceptionHandler(JsonParseException e) {
         return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
     }
 
